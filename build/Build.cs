@@ -96,6 +96,17 @@ partial class Build : NukeBuild
     const string ReleaseBranchPrefix = "release";
     const string HotfixBranchPrefix = "hotfix";
 
+    Target Foo => _ => _
+        .Executes(() =>
+        {
+            using var process = ProcessTasks.StartProcess(
+                "/Users/matt/.nuget/packages/jetbrains.resharper.globaltools/2020.2.0-eap05/tools/netcoreapp3.1/any/inspectcode.sh",
+                arguments: "/Users/matt/code/nuke/nuke-common.sln --output=/Users/matt/code/nuke/output/inspectCode.xml --debug",
+                logTimestamp: true,
+                logFile: RootDirectory / "inspectcode.log");
+            process.AssertZeroExitCode();
+        });
+
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
@@ -111,7 +122,8 @@ partial class Build : NukeBuild
         {
             DotNetRestore(_ => _
                 .SetProjectFile(Solution)
-                .SetIgnoreFailedSources(IgnoreFailedSources));
+                .SetIgnoreFailedSources(IgnoreFailedSources)
+                .EnableLogTimestamp());
         });
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
